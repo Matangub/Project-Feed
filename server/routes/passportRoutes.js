@@ -1,17 +1,99 @@
 var auth = require('passport-authentication')
+var mongoose = require('mongoose');
+var config = require('../config.js');
+var uuid = require('uuid');
 
+// models
+var UserDB = require('../models/user');
+
+function addNewStrategy(id, action, user, success, fail) {
+
+  var myUser = user != null ? new UserDB(user) : null;
+
+  switch(action) {
+    case 'CREATE':
+      myUser.save( (err) => {
+        if(err) return fail(err)
+
+        success(id)
+      });
+
+    case 'UPDATE':
+      myUser.update( {userToken: id}, user, (err) => {
+        if(err)
+          fail(err)
+        else
+          success()
+      });
+
+    default:
+      fail('unknown action');
+  }
+}
+
+/**************** GITHUB AUTHENTICATION *******************/
 auth.githubAuth( {
-  clientID: "700fe3db804f3467c860",
-  clientSecret: "4bef9aae7c30a008d3754ac60c768651ee011445",
-  callbackURL: "http://localhost:3000/auth/github/callback"
-}, (req, res) => {
+  id: config.social.github.id,
+  secret: config.social.github.secret,
+  callbackURL: config.credentials.host + '/auth/github/callback'
+}, (req, res, next) => {
 
-  res.json(req.user);
+  var user = req.user.profile._json;
 
-  // mongoose.model('users').find( (err, users) => {
-  //
-  //   res.json({users})
-  // })
+  UserDB.find( {userName: user.login, provider: 'github'}, (err, results) => {
+
+    if(results.length > 0) return res.json({success: true, userId: results[0].userId, msg: "signed in successfuly!"});
+
+    UserDB.create({
+      userId: uuid.v4(),
+      provider: 'github',
+      socialId: user.id,
+      name: user.name,
+      userName: user.login,
+      email: user.email,
+      accessToken: req.user.accessToken,
+      tokenSecret: 'none'
+    }, (err) => {
+      if(err) return next(err);
+
+      res.json({success: true, msg: "signed up successfuly!"});
+    });
+
+  })
+
+});
+
+/**************** TWITTER AUTHENTICATION *******************/
+auth.twitterAuth( {
+  id: config.social.twitter.id,
+  secret: config.social.twitter.secret,
+  callbackURL: config.credentials.host + '/auth/twitter/callback'
+}, (req, res, next) => {
+
+  var user = req.user;
+
+  UserDB.find( {userName: user.profile.username, provider: 'twitter'}, (err, results) => {
+
+    if(results.length > 0) return res.json({success: true, userId: results[0].userId, msg: "signed in successfuly!"});
+    var myid = uuid.v4();
+
+    UserDB.create({
+      userId: uuid.v4(),
+      provider: 'twitter',
+      socialId: user.profile.id,
+      name: user.profile._json.screen_name,
+      userName: user.profile.username,
+      email: 'none',
+      accessToken: user.accessToken,
+      tokenSecret: user.tokenSecret
+    }, (err) => {
+      if(err) return next(err);
+
+      res.json({success: true, msg: "signed up successfuly!"});
+    });
+  })
+
+
 });
 
 var authRoutes = auth.router;

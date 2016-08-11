@@ -7,20 +7,15 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
 var passportRoutes = require('./routes/passportRoutes');
+var twitter = require('./routes/twitter');
 
 var app = express();
+console.log('env: ', app.get('env'), '\n');
 
 //mongoose
-// grab the things we need
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/feedDB');
-
-fs.readdirSync(__dirname + '/models').forEach( (fileName) => {
-  // if(~fileName.indexOf('.js')) require(__dirname + "/models/" + fileName)
-  require(__dirname + "/models/" + fileName)
-})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -35,8 +30,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
 app.use('/auth', passportRoutes);
+app.use('/twitter', twitter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -45,13 +40,32 @@ app.use(function(req, res, next) {
   next(err);
 });
 
+// Add headers
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    // Pass to next layer of middleware
+    next();
+});
+
 // error handlers
 
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-
 
     res.status(err.status || 500);
     res.render('error', {

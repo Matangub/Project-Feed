@@ -16,14 +16,4 @@ router.get('/logout', function(req, res, next) {
   res.redirect('/');
 });
 
-/* users */
-router.get('/users', function(req, res, next) {
-
-  mongoose.model('users').find( (err, users) => {
-
-    res.json({users})
-  })
-});
-
-
 module.exports = router;
