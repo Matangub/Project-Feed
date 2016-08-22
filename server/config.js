@@ -1,6 +1,6 @@
 var config = {
   credentials: {
-    host: 'http://188.166.149.93:3000/',
+    host: 'http://188.166.149.93:3000',
   },
   social: { // social consumer key & secrets
     github: {
