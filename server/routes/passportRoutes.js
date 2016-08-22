@@ -17,10 +17,12 @@ auth.githubAuth( {
 
   UserDB.find( {userName: user.login, provider: 'github'}, (err, results) => {
 
-    if(results.length > 0) return res.json({success: true, userId: results[0].userId, msg: "signed in successfuly!"});
+    if(results.length > 0) return res.redirect('/' + results[0].userId);
+
+    var userId = uuid.v4();
 
     UserDB.create({
-      userId: uuid.v4(),
+      userId: userId,
       provider: 'github',
       socialId: user.id,
       name: user.name,
@@ -31,7 +33,7 @@ auth.githubAuth( {
     }, (err) => {
       if(err) return next(err);
 
-      res.json({success: true, msg: "signed up successfuly!"});
+      res.redirect('/' + userId);
     });
 
   })
@@ -49,7 +51,7 @@ auth.twitterAuth( {
 
   UserDB.find( {userName: user.profile.username, provider: 'twitter'}, (err, results) => {
 
-    if(results.length > 0) return res.json({success: true, userId: results[0].userId, msg: "signed in successfuly!"});
+    if(results.length > 0) return res.redirect('/' + results[0].userId);
     var myid = uuid.v4();
 
     UserDB.create({
@@ -64,7 +66,7 @@ auth.twitterAuth( {
     }, (err) => {
       if(err) return next(err);
 
-      res.json({success: true, msg: "signed up successfuly!"});
+      res.redirect('/' + userId);
     });
   })
 

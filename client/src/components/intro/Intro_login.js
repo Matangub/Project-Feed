@@ -40,6 +40,11 @@ export default class Intro_login extends React.Component{
     }])
   }
 
+  onNavigationStateChange (data) {
+
+    console.log(data);
+  }
+
   renderWebView() {
 
     if(this.state.loginMechanisem === null) return null;
@@ -47,6 +52,7 @@ export default class Intro_login extends React.Component{
     return (
       <WebView
       source={{uri: `${styleConfig.credentials.host}/auth/${this.state.loginMechanisem}`}}
+      onNavigationStateChange={ this.onNavigationStateChange }
       style={{flex: 1, zIndex: 1, position: 'absolute', top: 0, right: 0, width: width, height: height}}
       />
     )
