@@ -6,31 +6,6 @@ var uuid = require('uuid');
 // models
 var UserDB = require('../models/user');
 
-function addNewStrategy(id, action, user, success, fail) {
-
-  var myUser = user != null ? new UserDB(user) : null;
-
-  switch(action) {
-    case 'CREATE':
-      myUser.save( (err) => {
-        if(err) return fail(err)
-
-        success(id)
-      });
-
-    case 'UPDATE':
-      myUser.update( {userToken: id}, user, (err) => {
-        if(err)
-          fail(err)
-        else
-          success()
-      });
-
-    default:
-      fail('unknown action');
-  }
-}
-
 /**************** GITHUB AUTHENTICATION *******************/
 auth.githubAuth( {
   id: config.social.github.id,
@@ -67,7 +42,7 @@ auth.githubAuth( {
 auth.twitterAuth( {
   id: config.social.twitter.id,
   secret: config.social.twitter.secret,
-  callbackURL: config.credentials.host + '/auth/twitter/callback'
+  callbackURL: 'http://192.168.1.16:3000' + '/auth/twitter/callback'
 }, (req, res, next) => {
 
   var user = req.user;
