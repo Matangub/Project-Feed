@@ -24,6 +24,6 @@ module.exports = {
     quora: '#a82400',
   },
   credentials: {
-    host: 'http://192.168.1.16:3000'
+    host: 'http://188.166.149.93:3000'
   }
 }

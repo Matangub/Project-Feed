@@ -44,16 +44,9 @@ export default class Intro_login extends React.Component{
 
     if(this.state.loginMechanisem === null) return null;
 
-    setTimeout( () => {
-      console.log(454564654);
-      // console.log(this.refs['webviewRef'].getWebViewHandle());
-    }, 10000);
-
     return (
       <WebView
-      ref={'webviewRef'}
       source={{uri: `${styleConfig.credentials.host}/auth/${this.state.loginMechanisem}`}}
-      onLoadEnd={ (data) => { console.log(data) }}
       style={{flex: 1, zIndex: 1, position: 'absolute', top: 0, right: 0, width: width, height: height}}
       />
     )

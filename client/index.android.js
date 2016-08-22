@@ -24,6 +24,8 @@ import {
 
 import Icon from 'react-native-vector-icons/EvilIcons';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
+// var WebViewBridge = require('react-native-webview-bridge');
+
 import Button from 'react-native-vector-icons/FontAwesome';
 
 const width = Dimensions.get('window').width;
