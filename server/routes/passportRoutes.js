@@ -42,7 +42,7 @@ auth.githubAuth( {
 auth.twitterAuth( {
   id: config.social.twitter.id,
   secret: config.social.twitter.secret,
-  callbackURL: 'http://192.168.1.16:3000' + '/auth/twitter/callback'
+  callbackURL: config.credentials.host + '/auth/twitter/callback'
 }, (req, res, next) => {
 
   var user = req.user;
