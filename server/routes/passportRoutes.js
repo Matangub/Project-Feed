@@ -54,7 +54,6 @@ auth.twitterAuth( {
 
   UserDB.find( {userName: user.profile.username, provider: 'twitter'}, (err, results) => {
 
-    console.log(results[0].userId);
     if(results.length > 0) return res.redirect('/' + results[0].userId);
     var myid = uuid.v4();
 

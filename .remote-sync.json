@@ -1,0 +1,15 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": true,
+  "hostname": "188.166.149.93",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**"
+  ],
+  "username": "root",
+  "password": "uupkvjnus123",
+  "watch": [],
+  "transport": "scp",
+  "target": "/root/Project-Feed/server"
+}
