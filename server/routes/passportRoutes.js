@@ -24,12 +24,15 @@ auth.githubAuth( {
     UserDB.create({
       userId: userId,
       provider: 'github',
-      socialId: user.id,
       name: user.name,
       userName: user.login,
       email: user.email,
-      accessToken: req.user.accessToken,
-      tokenSecret: 'none'
+      providers: [{
+        provider: 'github',
+        socialId: user.id,
+        accessToken: req.user.accessToken,
+        tokenSecret: 'none'
+      }]
     }, (err) => {
       if(err) return next(err);
 
@@ -57,12 +60,15 @@ auth.twitterAuth( {
     UserDB.create({
       userId: uuid.v4(),
       provider: 'twitter',
-      socialId: user.profile.id,
       name: user.profile._json.screen_name,
       userName: user.profile.username,
       email: 'none',
-      accessToken: user.accessToken,
-      tokenSecret: user.tokenSecret
+      providers: [{
+        provider: 'twitter',
+        socialId: user.profile.id,
+        accessToken: user.accessToken,
+        tokenSecret: user.tokenSecret
+      }]
     }, (err) => {
       if(err) return next(err);
 
