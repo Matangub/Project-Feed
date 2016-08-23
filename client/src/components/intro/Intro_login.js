@@ -10,7 +10,8 @@ import {
   Image,
   TouchableNativeFeedback,
   Dimensions,
-  WebView
+  WebView,
+  AsyncStorage
 } from 'react-native';
 
 import Button from '../ui/Button.js';
@@ -42,7 +43,30 @@ export default class Intro_login extends React.Component{
 
   onNavigationStateChange (data) {
 
-    console.log(data);
+    var url = data.url;
+
+    if( (url.split('/').length -1 ) === 3 ) {
+
+      var userId = url.substring( url.lastIndexOf('/')+1 );
+      console.log(userId);
+      // try {
+      //   await AsyncStorage.setItem( 'userId', userId, () => {
+      //
+      //     try {
+      //       const value = await AsyncStorage.getItem('userId');
+      //       if (value !== null){
+      //         // We have data!!
+      //         console.log(value);
+      //         this.leaveIntro();
+      //       }
+      //     } catch (error) {
+      //       // Error retrieving data
+      //     }
+      //   });
+      // } catch (error) {
+      //   // Error saving data
+      // }
+    }
   }
 
   renderWebView() {
@@ -52,7 +76,7 @@ export default class Intro_login extends React.Component{
     return (
       <WebView
       source={{uri: `${styleConfig.credentials.host}/auth/${this.state.loginMechanisem}`}}
-      onNavigationStateChange={ this.onNavigationStateChange }
+      onNavigationStateChange={ this.onNavigationStateChange.bind(this) }
       style={{flex: 1, zIndex: 1, position: 'absolute', top: 0, right: 0, width: width, height: height}}
       />
     )

@@ -10,7 +10,8 @@ import {
   Image,
   TouchableNativeFeedback,
   Dimensions,
-  ListView
+  ListView,
+  AsyncStorage
 } from 'react-native';
 
 import styleConfig from '../../util/styleConfig.js';
@@ -27,6 +28,11 @@ export default class Main extends React.Component{
 
   constructor (props) {
     super(props)
+
+    AsyncStorage.setItem( 'hello', 'hello', () => {
+
+        console.log( AsyncStorage.getItem('hello') );
+    })
 
     var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
@@ -53,6 +59,7 @@ export default class Main extends React.Component{
   }
 
   render() {
+    console.log( 456789123 );
     // this.updateListView(['row 1', 'row 2', 'row3', 'row 1', 'row 2', 'row3']);
 
     return (

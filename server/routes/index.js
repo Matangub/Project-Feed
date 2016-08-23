@@ -3,6 +3,8 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var passport = require('passport');
 
+var UserDB = require('../models/user');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
@@ -11,7 +13,13 @@ router.get('/', function(req, res, next) {
 
 router.get('/:userId', (req, res, next) => {
 
-  res.sendStatus(200);
+  UserDB.find( {userId: req.params.userId}, (err, result) => {
+    if(err) return next(err);
+
+
+    res.json(result[0]);
+  })
+
 })
 
 router.get('/logout', function(req, res, next) {
