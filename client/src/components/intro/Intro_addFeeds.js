@@ -10,18 +10,28 @@ import {
   Image,
   TouchableNativeFeedback,
   Dimensions,
-  ListView
+  ListView,
+  AsyncStorage
 } from 'react-native';
+import { connect } from 'react-redux'
+import * as userActions from '../../actions/userActions.js';
 
 import Icon from 'react-native-vector-icons/EvilIcons';
 
 import AwesomeButton from '../ui/AwesomeButton.js';
+import SocialBox from '../ui/SocialBox.js';
+
 import styleConfig from '../../util/styleConfig.js';
 import Main from '../screens/Main.js';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
+@connect( (store) => {
+    return {
+      user: store.user
+    }
+})
 export default class Intro_addFeeds extends React.Component{
 
   constructor(props) {
@@ -30,24 +40,28 @@ export default class Intro_addFeeds extends React.Component{
     this.state = {
       socialProvides: [{
         name: 'facebook',
-        backgroundColor: '#3b5998'
+        backgroundColor: styleConfig.social.facebook
       },
       {
         name: 'twitter',
-        backgroundColor: '#55acee'
+        backgroundColor: styleConfig.social.twitter
       },
       {
         name: 'instagram',
-        backgroundColor: '#f56040'
+        backgroundColor: styleConfig.social.instagram
       },
       {
         name: 'linkedin',
-        backgroundColor: '#0077b5'
+        backgroundColor: styleConfig.social.linkedin
       }]
     };
   }
 
-  leaveIntro(){
+  componentDidMount() {
+    this.props.dispatch( userActions.getUser(this.props.userId) );
+  }
+
+  leaveIntro() {
     this.props.showNavBar(true);
 
     _navigator.immediatelyResetRouteStack([{
@@ -56,43 +70,39 @@ export default class Intro_addFeeds extends React.Component{
     }])
   }
 
-  renderBoxes () {
+  activeStatus (provider) {
 
+    let returnStatement = false;
+    this.props.user.providers.map( (item) => {
+
+      if(item.provider == provider) {
+        returnStatement = true;
+      }
+    })
+
+    return returnStatement;
+  }
+
+  renderBoxes () {
 
     return this.state.socialProvides.map( (item, key) => {
 
-      var boxStyle = {
-        viewBox: {
-          width: width/2.5,
-          margin: 5,
-          height: width/2.5,
-          margin: 5,
-          backgroundColor: `${item.backgroundColor}`,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderWidth: 3,
-          borderColor: styleConfig.colors.text,
-        },
-      };
       return (
-        <TouchableNativeFeedback background={TouchableNativeFeedback.SelectableBackground()} key={key}>
-          <View style={boxStyle.viewBox}>
-              <Icon name={`sc-${item.name}`} size={35} color="#fff" />
-              <Text style={{color: '#fff'}}>
-                { item.name }
-              </Text>
-          </View>
-        </TouchableNativeFeedback>
+        <SocialBox active={ this.activeStatus(item.name) } icon={`${item.name}`} key={key} backgroundColor={item.backgroundColor}>
+          { item.name }
+        </SocialBox>
       )
     })
   }
 
   render() {
-
+    console.log( this.props.user );
     return (
       <View style={styles.centerView}>
 
-        <Text style={{fontSize: 18, marginTop: 40, marginBottom: height/10, textAlign: 'center', color: '#fff'}}>Choose at least one social feed to add to your feed</Text>
+        <Text style={{fontSize: 18, marginTop: 40, marginBottom: height/10, textAlign: 'center', color: '#fff'}}>
+          Choose your social networks feeds
+        </Text>
 
         <View style={{flex: 1, flexDirection: 'row', flexWrap: 'wrap'}}>
           { this.renderBoxes() }
@@ -106,7 +116,7 @@ export default class Intro_addFeeds extends React.Component{
           color="#fff"
           onPress={this.leaveIntro.bind(this)}
           iconSize={35}>
-          Next
+          Confirm
           </AwesomeButton>
         </View>
       </View>
@@ -120,7 +130,7 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: styleConfig.colors.primary
+    backgroundColor: styleConfig.design.primary
   },
   socialListButton: {
     width: width,

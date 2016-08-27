@@ -9,12 +9,19 @@ import {
   ToolbarAndroid,
   Image,
   TouchableNativeFeedback,
-  Dimensions
+  Dimensions,
+  WebView,
+  AsyncStorage
 } from 'react-native';
+import { connect } from 'react-redux'
+import * as userActions from '../../actions/userActions.js';
 
 import AwesomeButton from '../ui/AwesomeButton.js';
 import styleConfig from '../../util/styleConfig.js';
-import Intro_login from './Intro_login.js';
+import Intro_addFeeds from './Intro_addFeeds.js';
+import Swiper from 'react-native-swiper';
+import Button from '../ui/Button.js';
+import Main from '../screens/Main';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -22,7 +29,7 @@ const width = Dimensions.get('window').width;
 const pagesArray = [
   {
     id: 0,
-    image: require('../../resources/images/wallpaper.png'),
+    image: require('../../resources/images/example.png'),
     imageText: 'By click on this icon you can combine all of your feeds into one super feed!'
   },
   {
@@ -32,115 +39,165 @@ const pagesArray = [
   }
 ]
 
+@connect()
 export default class Intro_screens extends React.Component{
 
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
-      screenState: 0
+      loginMechanisem: null
     }
   }
 
-  nextScreen() {
+  componentDidMount() {
 
-    this.setState({screenState: this.state.screenState+1});
+    // AsyncStorage.getItem('userId').then( (value) => {
+    //
+    //   if(value) {
+    //
+    //     this.props.showNavBar(true);
+    //
+    //     _navigator.immediatelyResetRouteStack([{
+    //       component: Main,
+    //       title: 'Add Social Feeds',
+    //       passProps: {
+    //         userId: Main
+    //       }
+    //     }])
+    //   }
+    // });
   }
 
-  goToLogin(){
+  nextScreen(userId){
 
     // this.props.showNavBar(true);
 
-    _navigator.push({
-      component: Intro_login,
-      title: 'Add Social Feeds'
-    })
+    _navigator.immediatelyResetRouteStack([{
+      component: Intro_addFeeds,
+      title: 'Add Social Feeds',
+      passProps: {
+        userId: userId
+      }
+    }])
   }
 
-  renderWelcome () {
+  onNavigationStateChange (data) {
+
+    var url = data.url;
+
+    if( (url.split('/').length -1 ) === 3 ) {
+
+      var userId = url.substring( url.lastIndexOf('/')+1 );
+      this.nextScreen(userId);
+    }
+  }
+
+  onError() {
+
+    console.log( 'onError' );
+  }
+
+  renderWebView() {
+
+    if(this.state.loginMechanisem === null) return null;
+
     return (
-
-      <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: styleConfig.colors.primary }}>
-        <View style={styles.imageContainer}>
-          <Text style={{color: '#fff', fontSize: 36}}> Welcome </Text>
-        </View>
-        <View>
-
-          <AwesomeButton iconName="forward" border="true" iconFirst={false} onPress={this.nextScreen.bind(this)} color="#fff" iconSize={35} background="red">
-          Get started
-          </AwesomeButton>
-
-        </View>
-      </View>
+      <WebView
+      source={{uri: `${styleConfig.credentials.host}/auth/${this.state.loginMechanisem}?action=CONNECT`}}
+      onNavigationStateChange={ this.onNavigationStateChange.bind(this) }
+      // onLoadEnd={ this.nextScreen.bind(this) }
+      style={{flex: 1, zIndex: 1, position: 'absolute', top: 0, right: 0, width: width, height: height}}
+      />
     )
   }
 
-  renderPage (data) {
+  login(loginMechanisem) {
 
-    var imgSrc = data.image;
-
-    return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', backgroundColor: styleConfig.colors.primary }}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Image source={imgSrc} style={styles.image}/>
-
-          <Text style={{color: '#fff', fontSize: 18, textAlign: 'center', marginTop: 10}}>
-            { data.imageText }
-          </Text>
-        </View>
-
-        <View style={{justifyContent: 'center', alignItems: 'center', marginBottom: 20}}>
-          <AwesomeButton
-            iconName="forward"
-            border="true"
-            iconFirst={false}
-            onPress={ pagesArray.length-1 === data.id ? this.goToLogin : this.nextScreen.bind(this)}
-            color="#fff"
-            iconSize={35}>
-              Next
-          </AwesomeButton>
-        </View>
-      </View>
-    );
+    this.setState({loginMechanisem: loginMechanisem});
   }
 
   render() {
 
-    switch( this.state.screenState ) {
+    return (
+      <View>
+        { this.renderWebView() }
+        <Swiper
+        style={styles.wrapper}
+        showsButtons={false}
+        loop={false}
+        activeDot={<View style={{backgroundColor: '#fff', width: 13, height: 13, borderRadius: 7, margin: 7}} />}
+        >
 
-      case 0: return this.renderWelcome()
+          <View style={styles.slide}>
+            <Image source={pagesArray[0].image} style={styles.image}/>
+            <Text style={styles.text}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at luctus mi, sed commodo felis. Morbi porttitor vestibulum rutrum. Duis
+            </Text>
+          </View>
 
-      case 1: return this.renderPage(pagesArray[0])
+          <View style={styles.slide}>
+            <Text style={styles.text}>Beautiful</Text>
+          </View>
 
-      case 2: return this.renderPage(pagesArray[1])
+          <View style={styles.slide}>
+            <Text style={styles.text}>And simple</Text>
+          </View>
 
-      default: return null;
-    }
+          <View style={styles.slide}>
+
+            <Button iconName="sc-facebook" size={35} onPress={this.nextScreen.bind(this)} background={styleConfig.design.primary}>
+            Connect with facebook
+            </Button>
+
+            <Button iconName="sc-twitter" size={35} onPress={this.login.bind(this, 'twitter')} background={styleConfig.design.primary}>
+            Connect with twitter
+            </Button>
+
+          </View>
+
+        </Swiper>
+      </View>
+    )
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: undefined,
-    height: undefined,
-    backgroundColor:'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageWrapper: {
-    marginBottom: 100,
-    alignItems: 'center',
-  },
-  image: {
-    marginTop: 10,
-    width: width/1.2,
-    height: height/1.4,
-    resizeMode: 'cover',
-  },
-  imageContainer: {
-    marginBottom: height/2,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
+    container: {
+        flex: 1,
+        width: undefined,
+        height: undefined,
+        backgroundColor:'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageWrapper: {
+        marginBottom: 100,
+        alignItems: 'center',
+    },
+    image: {
+        marginVertical: 50,
+        width: width/1.3,
+        height: 250,
+        resizeMode: 'cover',
+    },
+    imageContainer: {
+        marginBottom: height/2,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    wrapper: {
+
+    },
+    slide: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: styleConfig.design.primary,
+    },
+    text: {
+        color: styleConfig.design.text,
+        fontSize: 18,
+        textAlign: 'center'
+    }
 });

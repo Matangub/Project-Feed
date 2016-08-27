@@ -19,7 +19,6 @@ import Label from '../ui/Label.js';
 import AwesomeTextInput from '../ui/AwesomeTextInput.js';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 

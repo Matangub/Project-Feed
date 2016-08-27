@@ -15,6 +15,7 @@ import {
 
 import styleConfig from '../../util/styleConfig.js';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/EvilIcons';
 
 const width = Dimensions.get('window').width;
 
@@ -53,21 +54,21 @@ export default class Label extends React.Component{
             <View style={styles.bottomIcons}>
 
               <View style={styles.bottomIconsStyle}>
-                <Icon name="comment" style={{marginRight: 10}} size={20} />
+                <Icon2 name="comment" style={{marginRight: 10}} size={20} />
                 <Text>
                   112
                 </Text>
               </View>
 
               <View style={styles.bottomIconsStyle}>
-                <Icon name="heart" style={{marginRight: 10}} size={20} />
+                <Icon2 name="heart" style={{marginRight: 10}} size={20} />
                 <Text>
                   5
                 </Text>
               </View>
 
               <View style={styles.bottomIconsStyle}>
-                <Icon name="share" style={{marginRight: 10}} size={20} />
+                <Icon2 name="share-google" style={{marginRight: 10}} size={20} />
               </View>
 
             </View>
@@ -115,6 +116,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   bottomIconsStyle: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 });
