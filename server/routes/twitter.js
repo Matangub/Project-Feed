@@ -21,14 +21,24 @@ router.get('/:action/:userId', (req, res, next) => {
     if(results.length === 0) return res.json({success: false, msg: "invalid url params"});
 
     console.log(results[0].accessToken, results[0].tokenSecret);
+    var accessToken = '';
+    var accessTokenSecret = '';
 
+    results[0].providers.map( (item) => {
+
+      if(item.provider == 'twitter') {
+
+        accessToken = item.accessToken;
+        accessTokenSecret = item.tokenSecret;
+      }
+    })
     /* SETTING UP REQUEST URL ACCORDING TO USER ACTION */
     switch(urlAction) {
       case 'FEED':
         requestUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json";
-
+        break;
       default:
-        // res.json("Invalid url params")
+        res.json("Invalid action")
     }
 
     if(requestUrl === '') return res.json("invalid action");
@@ -39,16 +49,15 @@ router.get('/:action/:userId', (req, res, next) => {
     var url = requestUrl;
     var parameters = {
         oauth_consumer_key : config.social.twitter.id,
-        oauth_token : results[0].accessToken,
+        oauth_token : accessToken,
         oauth_nonce : oauth_nonce(),
         oauth_timestamp : timeStamp,
         oauth_signature_method : 'HMAC-SHA1',
         oauth_version : '1.0'
     };
     var consumerSecret = config.social.twitter.secret;
-    var tokenSecret = results[0].tokenSecret;
     // generates a RFC 3986 encoded, BASE64 encoded HMAC-SHA1 hash
-    encodedSignature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, tokenSecret),
+    encodedSignature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, accessTokenSecret),
 
     // signature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, tokenSecret,
     //     { encodeSignature: false});

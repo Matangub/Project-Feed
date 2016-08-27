@@ -10,9 +10,18 @@
     <p>Welcome to <%= title %></p>
 
     <ul>
-      <li><a href='/auth/github'>GitHub</a> <br /> </li>
-      <li><a href='/auth/twitter'>twitter</a> <br /> </li>
+      <li><a href='/auth/github?action=CONNECT'>GitHub connect</a> <br /> </li>
+      <li><a href='/auth/github?action=ADD_NEW_PROVIDER&userId=0d999119-1af5-46f2-b458-160764eba227'>GitHub add new provider</a> <br /> </li>
+
+      <li><a href='/auth/twitter?action=CONNECT'>twitter  connect</a> <br /> </li>
+      <li><a href='/auth/twitter?action=ADD_NEW_PROVIDER&userId=0d999119-1af5-46f2-b458-160764eba227'>twitter ad1d new provider</a> <br /> </li>
+
       <li><a href='/logout'>logout</a> <br /> </li>
     </ul>
+
+    <form action="/auth/twitter" method="post">
+      <input type="hidden" name="data" value="1" />
+      <input type="submit" value="twitter" />
+    </form>
   </body>
 </html>

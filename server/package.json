@@ -22,7 +22,7 @@
     "oauth_nonce": "^1.0.0",
     "orchestrate": "^0.3.11",
     "passport": "^0.2.2",
-    "passport-authentication": "../standAloneModules/passport-authentication",
+    "passport-authentication": "file:../standAloneModules/passport-authentication",
     "passport-facebook": "^1.0.3",
     "passport-github": "^1.1.0",
     "passport-google": "^0.3.0",

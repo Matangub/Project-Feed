@@ -78,25 +78,33 @@ module.exports = {
 
   githubAuth: function( credentials, callback) {
 
-    passport.use(new GithubStrategy({
-        clientID: credentials.id,
-        clientSecret: credentials.secret,
-        callbackURL: credentials.callbackURL
-      },
-      function(accessToken, refreshToken, profile, done) {
-        return done(null, {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          profile: profile
-        });
-      }
-    ));
-
     // we will call this to start the GitHub Login process
-    router.get('/github', passport.authenticate('github'));
+    router.get('/github', (req, res, next) => {
+
+      passport.use(new GithubStrategy({
+          clientID: credentials.id,
+          clientSecret: credentials.secret,
+          callbackURL: `${credentials.callbackURL}?action=${req.query.action}&userId=${req.query.userId}`
+        },
+        function(accessToken, refreshToken, profile, done) {
+
+          return done(null, {
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            profile: profile
+          });
+        }
+      ));
+
+      passport.authenticate('github')(req, res, next)
+    });
 
     // GitHub will call this URL
-    router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/' }), callback);
+    router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/' }), (req, res, next) => {
+
+      // res.sendStatus(200);
+      callback(req, res, next);
+    });
     //
     // router.get('/protected', ensureAuthenticated, function(req, res) {
     //   res.send("access granted. secure stuff happens here");
@@ -106,25 +114,34 @@ module.exports = {
 
   twitterAuth: function( credentials, callback) {
 
-    passport.use(new TwitterStrategy({
-        consumerKey: credentials.id,
-        consumerSecret: credentials.secret,
-        callbackURL: credentials.callbackURL
-      },
-      function(token, tokenSecret, profile, done) {
-        return done(null, {
-          accessToken: token,
-          tokenSecret: tokenSecret,
-          profile: profile
-        });
-      }
-    ));
-
     // we will call this to start the Twitter Login process
-    router.get('/twitter', passport.authenticate('twitter'));
+    router.get('/twitter', (req, res, next) => {
+
+      passport.use(new TwitterStrategy({
+          consumerKey: credentials.id,
+          consumerSecret: credentials.secret,
+          callbackURL: `${credentials.callbackURL}?action=${req.query.action}&userId=${req.query.userId}`,
+          passReqToCallback: true
+        },
+        function(req, token, tokenSecret, profile, done) {
+
+          return done(null, {
+            accessToken: token,
+            tokenSecret: tokenSecret,
+            profile: profile
+          });
+        }
+      ));
+
+      passport.authenticate('twitter')(req, res, next)
+    });
 
     // Twitter will call this URL
-    router.get('/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/' }), callback);
+    router.get('/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/' }), (req, res, next) => {
+
+      // res.sendStatus(200);
+      callback(req, res, next);
+    });
 
   }
 };

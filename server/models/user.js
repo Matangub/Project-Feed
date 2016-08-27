@@ -3,8 +3,9 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var providerSchema = new Schema({
-  provider: { type: String },
-  accessToken: { type: String },
+  provider: { type: String  },
+  activeFeed: { type: Boolean },
+  accessToken: { type: String  },
   tokenSecret: { type: String },
   id: { type: String }
 })
@@ -12,7 +13,7 @@ var providerSchema = new Schema({
 // create a schema
 var userSchema = new Schema({
   userId: { type: String, unique: true, required: true },
-  provider: { type: String, required: true },
+  loginProvider: { type: String, required: true },
   name: { type: String, required: true },
   userName: { type: String, required: true },
   email: { type: String, required: true },
