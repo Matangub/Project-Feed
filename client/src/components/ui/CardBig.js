@@ -14,7 +14,9 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Icon2 from 'react-native-vector-icons/EvilIcons';
+import moment from 'moment';
 
 import styleConfig from '../../util/styleConfig.js';
 
@@ -24,15 +26,20 @@ const height = Dimensions.get('window').height;
 export default class CardBig extends React.Component{
 
   propTypes: {
-
+    title: React.propTypes.string,
+    text: React.propTypes.string,
+    banner: React.propTypes.string,
+    media: React.propTypes.array,
   }
 
   static defaultProps = {
-
+    title: '',
+    text: '',
+    banner: '',
+    media: []
   }
 
   render() {
-
     const styles = StyleSheet.create({
 
       card: {
@@ -75,7 +82,8 @@ export default class CardBig extends React.Component{
       },
       toolbarTitle: {
         color: styleConfig.colors.cardText,
-        width: width,
+        width: width-50,
+        textAlign: 'left'
       },
       socialButtons: {
         flexDirection: 'row',
@@ -83,7 +91,8 @@ export default class CardBig extends React.Component{
       },
     })
 
-    var mytext = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque sed nulla ultrices, sodales augue et, aliquet leo. Nulla facilisi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum congue pharetra ornare. Integer mi ligula, dapibus in tincidunt ac, consequat vel ex. Integer sit amet egestas dui, rhoncus rhoncus mi. Fusce eros arcu, consectetur et sem in, cursus tristique nibh. Aenean porta erat nulla. Nullam id suscipit est. Quisque gravida massa eu rhoncus egestas. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam lobortis lacinia hendrerit. Aliquam urna elit, aliquet vitae interdum et, congue eu massa. Aenean vitae mattis ex."
+    let myText = this.props.text;
+    let timeAgo = moment( new Date(this.props.created_at) ).fromNow();
 
     return (
       <TouchableNativeFeedback onPress={this._onPressButton} background={TouchableNativeFeedback.SelectableBackground()}>
@@ -91,52 +100,61 @@ export default class CardBig extends React.Component{
 
           <View style={{flex: 1, flexDirection: 'row'}}>
 
-            <Image style={{height: 40, width: 40, borderRadius: 0, marginRight: 10}} source={ require('../../resources/images/exampleImage.jpg') } />
+            <Image style={{height: 40, width: 40, borderRadius: 0, marginRight: 10}} source={ { uri: this.props.banner.length > 0 ? this.props.banner : null } } />
             <View style={styles.toolbar}>
 
               <View style={{flexDirection: 'row', marginBottom: 5, width: width-(width/4.5)}}>
                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start'}}>
-                  <Text style={styles.toolbarButton}>Wired</Text>
+                  <Text style={styles.toolbarButton}>{ this.props.title }</Text>
                 </View>
 
                 <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end'}}>
                   <Text style={styles.toolbarButton2}>@WIREDMAGAZINE</Text>
-                  <Icon name="twitter" style={{color: styleConfig.social.twitter, marginLeft: 5}} size={20} />
+                  <Icon2 name="sc-twitter" style={{color: styleConfig.social.twitter, marginLeft: 5}} size={20} />
                 </View>
               </View>
 
-              <Text style={styles.toolbarButton2}>8 hr ago</Text>
+              <Text style={styles.toolbarButton2}> { timeAgo } </Text>
 
             </View>
           </View>
           <View style={{overflow: 'hidden'}}>
             <Text style={styles.toolbarTitle}>
             {
-              ( (mytext).length > 150 ) ? ( (mytext).substring(0,150-3) + '...' ) : mytext
+              ( (myText).length > 150 ) ? ( (myText).substring(0,150-3) + '...' ) : myText
             }
             </Text>
-            <Image style={{height: width/1.5, width: width, borderRadius: 0, marginRight: 10}} source={ require('../../resources/images/exampleImage.jpg') } />
+
+            {
+              this.props.media.map( (item, key) => {
+
+                return (
+
+                  <Image key={key} style={{height: width/1.5, width: width, borderRadius: 0, marginRight: 10}} source={ {uri: item.media_url_https} } />
+                )
+              })
+            }
 
             <View>
               <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 35, marginTop: 10}}>
 
                 <TouchableNativeFeedback onPress={this.props.onCommentsPress} background={TouchableNativeFeedback.SelectableBackground()}>
                   <View style={styles.socialButtons}>
-                    <Icon name="comment" style={{marginRight: 10}} size={25} />
+                    <Icon2 name="comment" style={{marginRight: 10}} size={25} />
                     <Text>110</Text>
                   </View>
                 </TouchableNativeFeedback>
 
                 <TouchableNativeFeedback onPress={this._onPressButton} background={TouchableNativeFeedback.SelectableBackground()}>
                   <View style={styles.socialButtons}>
-                    <Icon name="heart" style={{marginRight: 10}} size={25} />
+                    <Icon2 name="heart" style={{marginRight: 10}} size={25} />
                     <Text>110</Text>
                   </View>
                 </TouchableNativeFeedback>
 
                 <TouchableNativeFeedback onPress={this._onPressButton} background={TouchableNativeFeedback.SelectableBackground()}>
                   <View style={styles.socialButtons}>
-                    <Icon name="share-alt" style={{marginRight: 10}} size={25} />
+                    <Icon2 name="share-google" style={{marginRight: 10}} size={25} />
                     <Text>110</Text>
                   </View>
                 </TouchableNativeFeedback>

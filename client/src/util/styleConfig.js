@@ -1,5 +1,6 @@
 
 module.exports = {
+    // DEPRECATED
   colors: {
     primary: '#0091EA',
     secondary: '#FFB74D',
@@ -11,6 +12,16 @@ module.exports = {
     text: '#fff',
     text2: '#000',
     textFade: '#BDBDBD'
+  },
+  // CURRENT DESIGN
+  design: {
+    primary: '#039BE5',
+    secondary: 'rgb(204,204,204)',
+    border: '#ddd',
+    text: '#fff',
+    counterText: '#000',
+    text2: '#E0E0E0',
+    weakText: '#9E9E9E'
   },
   social: {
     twitter: '#55acee',

@@ -19,8 +19,14 @@ import {
   ToolbarAndroid,
   InteractionManager,
   TouchableNativeFeedback,
-  Dimensions
+  Dimensions,
+  BackAndroid,
+  TextInput,
+  AsyncStorage
 } from 'react-native';
+
+import { Provider } from 'react-redux';
+import store from './src/store.js';
 
 import Icon from 'react-native-vector-icons/EvilIcons';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
@@ -31,11 +37,11 @@ import Button from 'react-native-vector-icons/FontAwesome';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-import Intro_login from './src/components/intro/Intro_login';
 import Intro_screens from './src/components/intro/Intro_screens';
 import Main from './src/components/screens/Main';
 import Notifications from './src/components/screens/Notifications';
 import Search from './src/components/screens/Search';
+import AwesomeTextInput from './src/components/ui/AwesomeTextInput.js';
 
 import styleConfig from './src/util/styleConfig.js';
 
@@ -61,6 +67,11 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  navWrapper: {
+    padding: 5,
+    flex: 1,
+    flexDirection: 'row'
   },
   bottomTabs: {
     flex: 1,
@@ -95,12 +106,38 @@ class client extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       showNav: false,
       showMenu: false,
       viewState: 'bigCard',
-      activeTab: 'Main'
+      activeTab: 'Main',
+      userId: null,
+      initialComponent: Intro_screens
     };
+  }
+
+  componentWillMount(){
+    // AsyncStorage.getItem('userId').then( (value) => {
+    //   console.log('value', value)
+    //   if( value.length > 0 ) {
+    //
+    //     this.setState({ userId: value, showNav: true, initialComponent: Main})
+    //   } else {
+    //
+    //     this.setState({ userId: null, showNav: false, initialComponent: Intro_screens})
+    //   }
+    // })
+  }
+
+  componentDidMount() {
+    BackAndroid.addEventListener('hardwareBackPress', () => {
+      if (_navigator.getCurrentRoutes().length === 1  ) {
+         return false;
+      }
+      _navigator.pop();
+      return true;
+    });
   }
 
   showNavBar(condition) {
@@ -161,7 +198,7 @@ class client extends Component {
     return (
       <View style={{flex: 1}}>
         <route.component viewState={this.state.viewState} showNavBar={this.showNavBar.bind(this)} navigator={navigator} {...route.passProps} />
-        { (this.state.showNav) ? this.renderBottomTabs() : null }
+        {/* { (this.state.showNav) ? this.renderBottomTabs() : null } */}
       </View>
     );
   }
@@ -183,24 +220,49 @@ class client extends Component {
       Title() { return null; }
     };
 
+    const navStyle = StyleSheet.create({
+      TextInput: {
+        width: width - 20,
+        color: styleConfig.design.text
+      }
+    })
+
+    const renderBackButton = (index, navigator) => {
+
+      return (
+        <Icon.Button
+        onPress={() => { if (index > 0) { navigator.pop() } }}
+        name="arrow-left"
+        size={35}
+        style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
+        backgroundColor={ styleConfig.design.primary }
+        color={styleConfig.colors.text} />
+      )
+    }
+
     return {
       LeftButton(route, navigator, index, navState) {
 
-        if(index > 0) {
-          return (
-            <TouchableHighlight style={styles.navIcons} underlayColor="transparent" onPress={() => { if (index > 0) { navigator.pop() } }}>
-              <Icon name="arrow-left" size={50} color={styleConfig.colors.text} />
-            </TouchableHighlight>
-          )
-        }
-        else {
-          return null;
-        }
+        return (
+          <View style={styles.navWrapper}>
+
+            { index > 0 ? renderBackButton(index, navigator) : null }
+
+            <TextInput
+            placeholder="Search..."
+            placeholderTextColor={ styleConfig.design.border }
+            underlineColorAndroid={ styleConfig.design.border }
+            selectionColor={ styleConfig.design.text }
+            style={navStyle.TextInput}
+            editable={true}
+            maxLength = {60} />
+          </View>
+        );
       },
 
       RightButton(route, navigator, index, navState) {
 
-        <Icon2.Button size={25} name="ellipsis-v" iconStyle={{paddingLeft: 10}} backgroundColor={ styleConfig.colors.primary } onPress={ self.toggleMenu.bind(self, 'bigCard') } />
+        // <Icon2.Button size={25} name="ellipsis-v" iconStyle={{paddingLeft: 10}} backgroundColor={ styleConfig.colors.primary } onPress={ self.toggleMenu.bind(self, 'bigCard') } />
         return (
           <View style={styles.navIcons}>
           </View>
@@ -209,34 +271,40 @@ class client extends Component {
 
       Title(route, navigator, index, navState) {
         return (
-          <View style={styles.navIcons}>
-            <Text style={styles.text}>{ route.title }</Text>
-          </View>
+          null
         )
       }
     };
   }
 
-  render() {
+  renderNavigator() {
 
     return (
-      <Navigator
-        navigationBar={
+      <Provider store={store} >
+        <Navigator navigationBar={
           <Navigator.NavigationBar
-            style={ (this.state.showNav) ? {
-              ...styles.toolbar,
-              backgroundColor: styleConfig.colors.primary,
-              borderBottomWidth: 1,
-              borderBottomColor: styleConfig.colors.border,
-            } : {}}
-            routeMapper={ this.routeMap(this) } />
+          style={ (this.state.showNav) ? {
+            ...styles.toolbar,
+            backgroundColor: styleConfig.design.primary,
+            borderBottomWidth: 1,
+            borderBottomColor: styleConfig.design.border,
+          } : {} }
+          routeMapper={ this.routeMap(this) } />
         }
         sceneStyle={(this.state.showNav) ? {marginTop: 55} : {}}
         configureScene={ this.configureScene }
-        initialRoute={{ component: Intro_screens }}
-        renderScene={this.renderScene.bind(this)}
-        />
+        initialRoute={{ component: this.state.initialComponent }}
+        renderScene={this.renderScene.bind(this)} />
+      </Provider>
     );
+  }
+
+  render() {
+    return (
+      <View style={{flex: 1}}>
+        { this.renderNavigator() }
+      </View>
+    )
   }
 }
 

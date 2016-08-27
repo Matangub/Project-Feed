@@ -48,7 +48,6 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: styleConfig.colors.border,
     padding: 10
   },
   socialListButton: {
