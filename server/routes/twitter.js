@@ -20,7 +20,6 @@ router.get('/:action/:userId', (req, res, next) => {
 
     if(results.length === 0) return res.json({success: false, msg: "invalid url params"});
 
-    console.log(results[0].accessToken, results[0].tokenSecret);
     var accessToken = '';
     var accessTokenSecret = '';
 
@@ -36,6 +35,9 @@ router.get('/:action/:userId', (req, res, next) => {
     switch(urlAction) {
       case 'FEED':
         requestUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json";
+        break;
+      case 'MORE_FEED':
+        requestUrl = `https://api.twitter.com/1.1/statuses/home_timeline.json?max_id=${req.query.max_id}?count=${req.query.count}`;
         break;
       default:
         res.json("Invalid action")
