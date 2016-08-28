@@ -22,7 +22,8 @@ import {
   Dimensions,
   BackAndroid,
   TextInput,
-  AsyncStorage
+  AsyncStorage,
+  WebView
 } from 'react-native';
 
 import { Provider } from 'react-redux';
@@ -113,7 +114,9 @@ class client extends Component {
       viewState: 'bigCard',
       activeTab: 'Main',
       userId: null,
-      initialComponent: Intro_screens
+      initialComponent: Intro_screens,
+      renderWebview: false,
+      webViewLink: null
     };
   }
 
@@ -191,13 +194,52 @@ class client extends Component {
     )
   }
 
+  renderLink (showWebView, link=null) {
+
+    console.log(showWebView, link);
+    this.showNavBar(!showWebView);
+
+    this.setState({
+      renderWebview: showWebView,
+      webViewLink: link
+    })
+  }
+
+  renderWebview () {
+
+    if(!this.state.renderWebview) return null;
+
+    return (
+      <View style={{flex: 1}}>
+        <View style={{flexDirection: 'row', backgroundColor: styleConfig.design.primary}}>
+          <TouchableNativeFeedback onPress={ this.renderLink.bind(this, false) } background={TouchableNativeFeedback.SelectableBackground()}>
+            <View style={styles.socialButtons}>
+              <Icon2.Button
+                name="close"
+                backgroundColor={ styleConfig.design.primary }
+                onPress={ this.renderLink.bind(this, false) }
+                style={{margin: 10}}
+                size={25} />
+            </View>
+          </TouchableNativeFeedback>
+        </View>
+        <WebView
+        source={{uri: this.state.webViewLink}}
+        style={{position: 'absolute', height: height, width: width, top: 0, right: 0, zIndex: 1}}
+        />
+      </View>
+    )
+
+  }
+
   renderScene(route, navigator) {
 
     _navigator = navigator;
 
     return (
       <View style={{flex: 1}}>
-        <route.component viewState={this.state.viewState} showNavBar={this.showNavBar.bind(this)} navigator={navigator} {...route.passProps} />
+        { this.renderWebview.bind(this)() }
+        <route.component viewState={this.state.viewState} renderWebview={this.renderLink.bind(this)} showNavBar={this.showNavBar.bind(this)} navigator={navigator} {...route.passProps} />
         {/* { (this.state.showNav) ? this.renderBottomTabs() : null } */}
       </View>
     );

@@ -10,13 +10,15 @@ export function getUser(userId) {
     // var uri = 'http://rest.learncode.academy/api/test123/tweets';
 
     return axios(uri).then( (response) => {
-
       dispatch({
         type: 'SET_USER',
         payload: { user: response.data }
       })
 
       AsyncStorage.setItem('userId', userId);
+    }).catch( (err) =>  {
+      // console.log('error');
+      // console.log(err);
     })
   }
 }

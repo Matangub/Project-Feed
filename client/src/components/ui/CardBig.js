@@ -11,11 +11,13 @@ import {
   TouchableNativeFeedback,
   TextInput,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  WebView
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
+import Hyperlink from 'react-native-hyperlink';
 import moment from 'moment';
 
 import styleConfig from '../../util/styleConfig.js';
@@ -40,64 +42,14 @@ export default class CardBig extends React.Component{
   }
 
   render() {
-    const styles = StyleSheet.create({
-
-      card: {
-        width: width,
-        minHeight: 110,
-        backgroundColor: styleConfig.colors.background,
-        padding: 10,
-        flexDirection: 'row',
-        borderBottomColor: styleConfig.colors.border,
-        borderBottomWidth: 1,
-      },
-      cardTitle: {
-        color: styleConfig.colors.cardText,
-        fontSize: 18,
-        margin: 0,
-        padding: 0,
-        flex: 1
-      },
-      mainContainer: {
-        width: width,
-        padding:10,
-        marginBottom: 15,
-        backgroundColor: styleConfig.colors.text,
-        borderBottomWidth: 1,
-        borderBottomColor: styleConfig.colors.border
-      },
-      toolbarButton: {
-        color: styleConfig.colors.cardText
-      },
-      toolbarButton2: {
-        color: styleConfig.colors.textFade,
-        fontSize: 12,
-        marginTop: 0,
-      },
-      toolbarButton3: {
-        color: styleConfig.colors.textFade,
-        fontSize: 10,
-        alignItems: 'center',
-        justifyContent: 'center'
-      },
-      toolbarTitle: {
-        color: styleConfig.colors.cardText,
-        width: width-50,
-        textAlign: 'left'
-      },
-      socialButtons: {
-        flexDirection: 'row',
-        alignItems: 'center'
-      },
-    })
 
     let myText = this.props.text;
     let timeAgo = moment( new Date(this.props.created_at) ).fromNow();
 
     return (
       <TouchableNativeFeedback onPress={this._onPressButton} background={TouchableNativeFeedback.SelectableBackground()}>
-        <View style={styles.mainContainer}>
 
+        <View style={styles.mainContainer}>
           <View style={{flex: 1, flexDirection: 'row'}}>
 
             <Image style={{height: 40, width: 40, borderRadius: 0, marginRight: 10}} source={ { uri: this.props.banner.length > 0 ? this.props.banner : null } } />
@@ -119,11 +71,13 @@ export default class CardBig extends React.Component{
             </View>
           </View>
           <View style={{overflow: 'hidden'}}>
-            <Text style={styles.toolbarTitle}>
-            {
-              ( (myText).length > 150 ) ? ( (myText).substring(0,150-3) + '...' ) : myText
-            }
-            </Text>
+            <Hyperlink onPress={ this.props.handleLink.bind(this) } linkStyle={{color:'#2980b9'}}>
+                <Text style={styles.toolbarTitle}>
+                {
+                  ( (myText).length > 150 ) ? ( (myText).substring(0,150-3) + '...' ) : myText
+                }
+                </Text>
+            </Hyperlink>
 
             {
               this.props.media.map( (item, key) => {
@@ -168,3 +122,52 @@ export default class CardBig extends React.Component{
     );
   }
 }
+
+const styles = StyleSheet.create({
+
+  card: {
+    width: width,
+    minHeight: 110,
+    backgroundColor: styleConfig.colors.background,
+    padding: 10,
+    flexDirection: 'row',
+    borderBottomColor: styleConfig.colors.border,
+    borderBottomWidth: 1,
+  },
+  cardTitle: {
+    color: styleConfig.colors.cardText,
+    fontSize: 18,
+    margin: 0,
+    padding: 0,
+    flex: 1
+  },
+  mainContainer: {
+    padding:10,
+    marginBottom: 15,
+    backgroundColor: styleConfig.colors.text,
+    borderBottomWidth: 1,
+    borderBottomColor: styleConfig.colors.border
+  },
+  toolbarButton: {
+    color: styleConfig.colors.cardText
+  },
+  toolbarButton2: {
+    color: styleConfig.colors.textFade,
+    fontSize: 12,
+    marginTop: 0,
+  },
+  toolbarButton3: {
+    color: styleConfig.colors.textFade,
+    fontSize: 10,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  toolbarTitle: {
+    color: styleConfig.colors.cardText,
+    textAlign: 'left'
+  },
+  socialButtons: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+})
