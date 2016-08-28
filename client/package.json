@@ -12,6 +12,7 @@
     "moment": "^2.14.1",
     "react": "15.2.1",
     "react-native": "0.31.0",
+    "react-native-hyperlink": "0.0.5",
     "react-native-icon-button": "^1.0.0",
     "react-native-material-design": "^0.3.7",
     "react-native-material-kit": "^0.3.2",
