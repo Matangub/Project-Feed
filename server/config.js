@@ -8,8 +8,8 @@ var config = {
       secret: "4bef9aae7c30a008d3754ac60c768651ee011445"
     },
     twitter: {
-      id: '64T3XqgaW9lOBDcpZGKLdF4ZI',
-      secret: 'G90gd8p6cfz9EVHIgbVV9epAw68gmgGlbEecNpXqzqKkkH6CPs'
+      id: '5YB7ftXo6EQoCaHmYikV7AmcA',
+      secret: 'DeWvSf5MHuGIPB1toMjGRUttQy5Wh6AtIwUBlpy2qZLgPSxenf'
     }
   }
 }
