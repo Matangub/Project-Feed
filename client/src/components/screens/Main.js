@@ -14,7 +14,8 @@ import {
   AsyncStorage,
   ScrollView,
   RefreshControl,
-  ActivityIndicator
+  ActivityIndicator,
+  Linking
 } from 'react-native';
 import { connect } from 'react-redux'
 import * as userActions from '../../actions/feedActions.js';
@@ -22,7 +23,7 @@ import ScrollableTabView from 'react-native-scrollable-tab-view';
 
 import styleConfig from '../../util/styleConfig.js';
 import Card from '../ui/Card.js';
-import CardBig from '../ui/CardBig.js';
+import TwitterCard from '../ui/TwitterCard.js';
 import TabBar from '../ui/TabBar.js';
 
 import Comments from './Comments.js'
@@ -45,7 +46,8 @@ export default class Main extends React.Component{
     var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
       isRefreshing: false,
-      dataSource: ds.cloneWithRows( this.props.feed.twitter.data ),
+      twitterFeedList: ds.cloneWithRows( this.props.feed.twitter.data ),
+      feedScrollOffSet: 0,
     }
   }
 
@@ -83,6 +85,7 @@ export default class Main extends React.Component{
   }
 
   handleLink(link) {
+    Linking.openURL(link).catch(err => console.error('An error occurred', err));
     // this.props.renderWebview( true, link )
   }
 
@@ -90,7 +93,7 @@ export default class Main extends React.Component{
 
     var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.setState({
-      dataSource: ds.cloneWithRows(moreData)
+      twitterFeedList: ds.cloneWithRows(moreData)
     });
   }
 
@@ -98,11 +101,19 @@ export default class Main extends React.Component{
     let windowHeight = Dimensions.get('window').height;
     let height = e.nativeEvent.contentSize.height;
     let offset = e.nativeEvent.contentOffset.y;
+    // console.log('offset', offset);
 
-    if( (windowHeight + offset >= height) && !this.props.feed.twitter.fetchingMore ){
+    if(offset > (this.state.feedScrollOffSet + 350) ) {
 
-      this.fetchMoreFeed('twitter');
+      // this.setState({feedScrollOffSet: offset})
+      // console.log('this.state.feedScrollOffSet');
+      // console.log(this.state.feedScrollOffSet);
     }
+  }
+
+  set_like(postId, value) {
+    console.log('SET LIKE!!!');
+    this.props.dispatch( userActions.twitter_toggle_like( this.props.user.userId, postId, value) )
   }
 
   renderFooter() {
@@ -122,23 +133,31 @@ export default class Main extends React.Component{
 
     return (
       <ListView
-      dataSource={this.state.dataSource}
+      dataSource={this.state.twitterFeedList}
       enableEmptySections={ this.props.feed.twitter.data.length === 0 }
       // onEndReached={ this.fetchMoreFeed }
       // onEndReachedThreshold={100}
       renderFooter={ this.renderFooter.bind(this) }
-      pageSize={20}
-      renderRow={(rowData) => {
-
+      pageSize={1}
+      renderRow={(rowData, sectionID, rowID) => {
         return (
-          <CardBig
-            title={ rowData.user.name }
-            text={ rowData.text }
-            handleLink={ this.handleLink.bind(this) }
-            created_at={ rowData.created_at }
-            banner={ rowData.user.profile_image_url_https }
-            media={ rowData.extended_entities ? rowData.extended_entities.media : [] }
-            onCommentsPress={ this.goToComments } />
+          <View>
+            {
+              (rowData.retweeted_status) ?
+                <TwitterCard
+                  feedScrollOffSet={ this.state.feedScrollOffSet }
+                  rowData={rowData}
+                  handleLink={ this.handleLink.bind(this) }
+                  set_like={ ( id, value ) => this.set_like(id, value) }
+                  onCommentsPress={ this.goToComments } /> : null
+            }
+            <TwitterCard
+              feedScrollOffSet={ this.state.feedScrollOffSet }
+              rowData={rowData}
+              handleLink={ this.handleLink.bind(this) }
+              set_like={ ( id, value ) => this.set_like(id, value) }
+              onCommentsPress={ this.goToComments } />
+          </View>
         )
       }}/>
     );
@@ -157,6 +176,10 @@ export default class Main extends React.Component{
           onScroll={ this.onFeedScroll.bind(this) }
           refreshControl={
               <RefreshControl
+                  tintColor={styleConfig.design.primary}
+                  title="Loading..."
+                  titleColor={styleConfig.design.primary}
+                  colors={[styleConfig.design.primary]}
                   refreshing={this.props.feed.twitter.fetching}
                   onRefresh={this.fetchFeed.bind(this)}
               />

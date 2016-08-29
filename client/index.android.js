@@ -31,6 +31,7 @@ import store from './src/store.js';
 
 import Icon from 'react-native-vector-icons/EvilIcons';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
+// import Webbrowser from 'react-native-webbrowser';
 // var WebViewBridge = require('react-native-webview-bridge');
 
 import Button from 'react-native-vector-icons/FontAwesome';
@@ -211,7 +212,15 @@ class client extends Component {
 
     return (
       <View style={{flex: 1}}>
-        <View style={{flexDirection: 'row', backgroundColor: styleConfig.design.primary}}>
+          {/* <Webbrowser
+                url={ this.state.webViewLink }
+                hideHomeButton={false}
+                hideToolbar={false}
+                hideAddressBar={false}
+                hideStatusBar={false}
+                foregroundColor={'#efefef'}
+                backgroundColor={'#333'} /> */}
+        {/* <View style={{flexDirection: 'row', backgroundColor: styleConfig.design.primary}}>
           <TouchableNativeFeedback onPress={ this.renderLink.bind(this, false) } background={TouchableNativeFeedback.SelectableBackground()}>
             <View style={styles.socialButtons}>
               <Icon2.Button
@@ -226,7 +235,7 @@ class client extends Component {
         <WebView
         source={{uri: this.state.webViewLink}}
         style={{position: 'absolute', height: height, width: width, top: 0, right: 0, zIndex: 1}}
-        />
+        /> */}
       </View>
     )
 

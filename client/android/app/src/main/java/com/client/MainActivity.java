@@ -1,6 +1,7 @@
 package com.client;
 
 import com.facebook.react.ReactActivity;
+import com.brentvatne.react.ReactVideoPackage;
 import com.github.xinthink.rnmk.ReactMaterialKitPackage;
 
 public class MainActivity extends ReactActivity {

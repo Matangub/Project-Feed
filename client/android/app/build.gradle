@@ -142,6 +142,8 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-video')
+    compile project(':react-native-media-kit')
     compile project(':react-native-material-kit')
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:23.0.1"
