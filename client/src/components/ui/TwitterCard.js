@@ -130,7 +130,7 @@ export default class TwitterCard extends React.Component{
                   </View>
                 </TouchableNativeFeedback>
 
-                <TouchableNativeFeedback onPress={this.props.set_like.bind(this, cardData.id,  cardData.like)} background={TouchableNativeFeedback.SelectableBackground()}>
+                <TouchableNativeFeedback onPress={this.props.set_like.bind(this, cardData.id, !cardData.like)} background={TouchableNativeFeedback.SelectableBackground()}>
                   <View style={styles.socialButtons}>
                     <Icon
                       name="ios-heart" color={ cardData.like ? '#C62828' : styleConfig.design.secondary }
