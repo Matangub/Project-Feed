@@ -22,6 +22,9 @@ router.get('/:action/:userId', (req, res, next) => {
 
     var accessToken = '';
     var accessTokenSecret = '';
+    var httpMethod = 'GET';
+    var formParams = {}; // for a more complicated request params
+    var signatureFields = {}; // some requests require to add more params to signature algorithm
 
     results[0].providers.map( (item) => {
 
@@ -39,15 +42,28 @@ router.get('/:action/:userId', (req, res, next) => {
       case 'MORE_FEED':
         requestUrl = `https://api.twitter.com/1.1/statuses/home_timeline.json?max_id=${req.query.max_id}?count=${req.query.count}`;
         break;
+      case 'LIKE':
+        httpMethod="POST";
+        formParams = { id: req.query.postId }
+        requestUrl = `https://api.twitter.com/1.1/favorites/create.json`;
+        break;
+      case 'UNLIKE':
+        httpMethod="POST";
+        formParams = { id: req.query.postId }
+        requestUrl = `https://api.twitter.com/1.1/favorites/destroy.json`;
+        break;
+      case 'GET_REPLIES':
+        signatureFields = { q: req.query.q};
+        requestUrl = `https://api.twitter.com/1.1/search/tweets.json?q=${encodeURIComponent(req.query.q)}`;
+        break;
       default:
-        res.json("Invalid action")
+        return res.json("Invalid action")
     }
 
     if(requestUrl === '') return res.json("invalid action");
 
     /* SETTING UP URL HEADERS FOR TWITTER API */
     var timeStamp = Math.floor(new Date().getTime() / 1000);
-    var httpMethod = 'GET';
     var url = requestUrl;
     var parameters = {
         oauth_consumer_key : config.social.twitter.id,
@@ -57,32 +73,110 @@ router.get('/:action/:userId', (req, res, next) => {
         oauth_signature_method : 'HMAC-SHA1',
         oauth_version : '1.0'
     };
+    parameters = Object.assign( parameters, signatureFields );
+
     var consumerSecret = config.social.twitter.secret;
     // generates a RFC 3986 encoded, BASE64 encoded HMAC-SHA1 hash
-    encodedSignature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, accessTokenSecret),
-
-    // signature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, tokenSecret,
-    //     { encodeSignature: false});
-
-    console.log('\n\n\n\n');
-    // console.log(httpMethod, url, parameters, consumerSecret, tokenSecret);
+    var encodedSignature = oauth_signature.generate(httpMethod, url, parameters, consumerSecret, accessTokenSecret)
     // console.log(signature);
 
     var headers =  {
       'User-Agent': 'request',
-      //new Date().getTime() / 1000
       'Authorization': `OAuth oauth_consumer_key=${parameters.oauth_consumer_key},oauth_nonce=${parameters.oauth_nonce},oauth_signature=${encodedSignature},oauth_signature_method="HMAC-SHA1",oauth_timestamp="${parameters.oauth_timestamp}",oauth_token=${parameters.oauth_token},oauth_version="1.0"`
     };
 
     // ACTUALL REQUEST TO THE API
-    request({url: requestUrl, headers: headers}, (err, response, body) => {
+    request({
+      url: requestUrl,
+      method: httpMethod.toLowerCase(),
+      headers: headers,
+      // form: { q: '%40StackOverflow'}
+      formData: formParams
+    }, (err, response, body) => {
 
-      res.json({response: response});
+      // if( JSON.parse( response.body ).errors ) return res.json(JSON.parse(response.body));
+
+      switch(urlAction) {
+
+        case 'FEED': {
+          handleFeed(req, res, response, body);
+          // res.json(JSON.parse(response.body));
+          break;
+        }
+        case 'MORE_FEED': {
+          handleFeed(req, res, response, body);
+          // res.json(JSON.parse(response.body));
+          break;
+        }
+        case 'GET_REPLIES': {
+
+          handleReplies(req, res, response, body);
+          break;
+        }
+        default: {
+          console.log('\n');
+          console.log(response);
+          console.log('\n');
+          res.json({response: response});
+        }
+      }
     })
-
-    // res.json({success: true, id: userId})
   })
 
 });
+
+function handleFeed(req, res, response, body) {
+
+  const getMedia = (media) => {
+
+    var exportMedia = media.map( (item) => {
+
+      return {
+        id: item.id_str,
+        media: item.media_url_https,
+        type: item.type,
+        videoLink: item.video_info ? item.video_info.variants[0].url : null
+      }
+    })
+    return exportMedia;
+    // return media;
+  }
+
+  var data = JSON.parse(response.body);
+  var exportData = data.map( (item) => {
+
+    var jsonItem = item.retweeted_status ? item.retweeted_status : item;
+
+    return {
+      original: item,
+      retweet: item.retweet,
+      postId: item.id,
+      id: item.id_str,
+      like: item.favorited,
+      likeCounter: item.favorite_count,
+      title: jsonItem.user.name,
+      name: jsonItem.user.screen_name,
+      text: jsonItem.text,
+      created_at: jsonItem.created_at,
+      banner: jsonItem.user.profile_image_url_https,
+      media: jsonItem.extended_entities ? getMedia( jsonItem.extended_entities.media ) : [],
+    }
+  })
+
+  res.json(exportData);
+}
+
+function handleReplies (req, res, response, body) {
+
+  var data = JSON.parse(response.body);
+  var replies = data.statuses.filter( (item) => {
+
+    if(item.in_reply_to_status_id_str == req.query.postId) {
+      return item;
+    }
+  })
+
+  res.json({response: replies});
+}
 
 module.exports = router;
