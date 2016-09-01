@@ -168,6 +168,26 @@ auth.twitterAuth( {
 
 });
 
+/* ********************* FACEBOOK AUTH ******************** */
+auth.facebookAuth( {
+  id: config.social.facebook.id,
+  secret: config.social.facebook.secret,
+  callbackURL: config.credentials.host + '/auth/facebook/callback'
+}, (req, res, next) => {
+  var user = req.user;
+  console.log('params');
+  console.log(req.query);
+
+  switch( req.query.action ) {
+
+    case 'CONNECT': {
+      console.log('CREATE ACTION!!!!');
+    }
+  }
+
+  res.json(user);
+});
+
 var authRoutes = auth.router;
 
 module.exports = authRoutes;

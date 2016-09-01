@@ -13,25 +13,77 @@ import {
   Dimensions
 } from 'react-native';
 
+import VideoPlayer from './VideoPlayer.js';
+import {Video} from 'react-native-media-kit';
+
 import styleConfig from '../../util/styleConfig.js';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
+import moment from 'moment';
 
 const width = Dimensions.get('window').width;
 
 export default class Label extends React.Component{
 
   propTypes: {
-    image: React.propTypes.String
+    image: React.propTypes.String,
+    text: React.propTypes.String,
+    name: React.propTypes.String,
+    id: React.propTypes.String,
+    created_at: React.propTypes.String,
   }
 
   static defaultProps = {
-    image: '../../resources/images/exampleImage.jpg'
+    image: ''
+    // image: '../../resources/images/exampleImage.jpg'
+  }
+
+  renderImage (item, key) {
+
+    return (
+
+      <Image
+        key={key}
+        style={{height: width/1.5, width: width-20, borderRadius: 0, marginRight: 10}}
+        source={ {uri: item.media} } />
+    )
+  }
+
+  renderVideo (item, key) {
+    return (
+      <View key={key} style={{flex: 1}}>
+        <Video
+            style={{height: width / (16/9) }}
+            src={item.videoLink}
+            autoplay={false}
+            preload={'auto'}
+            loop={true}
+            controls={true}
+            muted={false}
+            poster={item.media}
+          />
+      </View>
+    )
+  }
+
+  renderMedia(item, key) {
+
+    switch( item.type) {
+
+      case 'photo': {
+        return this.renderImage(item, key);
+      }
+      case 'video': {
+        return this.renderVideo(item, key);
+      }
+      default: return null;
+    }
   }
 
   render() {
 
-    var myText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut id metus vel lorem ullamcorper efficitur vel tristique risus. Fusce non laoreet nulla. Aliquam feugiat faucibus ipsum, nec dignissim massa mattis ac. Suspendisse nec ante orci. Nam ac efficitur ex. Morbi sapien felis, ornare et lacus quis, ultricies accumsan ipsum. Ut gravida lacus non eros dictum, gravida efficitur lorem euismod.';
+    let myText = this.props.text;
+    let timeAgo = moment( new Date(this.props.created_at) ).fromNow();
 
     return (
       <TouchableNativeFeedback onPress={this._onPressButton} background={TouchableNativeFeedback.SelectableBackground()}>
@@ -42,14 +94,16 @@ export default class Label extends React.Component{
 
           <View>
             <View style={styles.topLabelStyle}>
-              <Text style={styles.title}>Label Name</Text>
-              <Text style={styles.smallText}>8 hr ago</Text>
+              <Text style={styles.title}> {this.props.name} </Text>
+              <Text style={styles.smallText}>{ timeAgo }</Text>
             </View>
             <Text style={{width: width/1.3}}>
               {
                 ( (myText).length > 150 ) ? ( (myText).substring(0,150-3) + '...' ) : myText
               }
             </Text>
+
+            { this.props.media.map( this.renderMedia.bind(this) ) }
 
             <View style={styles.bottomIcons}>
 

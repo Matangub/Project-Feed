@@ -13,6 +13,8 @@ import {
   ListView,
   TextInput
 } from 'react-native';
+import { connect } from 'react-redux'
+import * as feedActions from '../../actions/feedActions.js';
 
 import styleConfig from '../../util/styleConfig.js';
 import Label from '../ui/Label.js';
@@ -22,14 +24,74 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
+@connect( (store) => {
+    return {
+      user: store.user,
+      feed: store.feed
+    }
+})
 export default class Comments extends React.Component{
 
   constructor (props) {
     super(props)
 
-    var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    let socialProvider = 'twitter';
+    console.log('this.props.feed[socialProvider].data');
+    console.log(this.props.feed[socialProvider].data);
     this.state = {
-      dataSource: ds.cloneWithRows(['row 1', 'row 2', 'row 1', 'row 2', 'row 1', 'row 2', 'row 1', 'row 2', 'row 1', 'row 2']),
+      socialProvider: socialProvider,
+      replies: ds.cloneWithRows( [] ),
+    }
+  }
+
+  componentWillMount() {
+
+    // setTimeout( () => {
+    //
+    //   console.log('this.getTweetItem()');
+    //   let replies = this.getTweetItem()[0].replies
+    //   console.log('replies');
+    //   console.log(replies);
+    //   this.updateListView( replies )
+    // }, 300);
+    this.props.dispatch(feedActions.get_replies(this.props.user.userId, this.props.id));
+
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log('111')
+    this.updateListView( this.getTweetItem()[0].replies );
+  }
+
+  getTweetItem () {
+
+    let socialProvider = this.state.socialProvider;
+
+    return this.props.feed[socialProvider].data.filter( (item) => {
+
+        if(item.id == this.props.id) {
+          return item;
+        }
+    })
+  }
+
+  updateListView(moreData) {
+
+    console.log('moreData');
+    console.log(moreData);
+
+    let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    if(moreData) {
+
+      this.setState({
+        replies: ds.cloneWithRows(moreData)
+      });
+    }
+    else {
+      let a = this.getTweetItem();
+      console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+      console.log(a)
     }
   }
 
@@ -40,16 +102,19 @@ export default class Comments extends React.Component{
 
   render() {
     // this.updateListView(['row 1', 'row 2', 'row3', 'row 1', 'row 2', 'row3']);
+    let socialProvider = this.state.socialProvider;
+    let isEmpty = this.props.feed[socialProvider].data.replies ? this.props.feed[socialProvider].data.replies.length : 0
 
     return (
       <View style={styles.centerView}>
         <ListView
-          dataSource={this.state.dataSource}
+          enableEmptySections={ true }
+          dataSource={this.state.replies}
           renderRow={(rowData) => {
+            console.log('rowData')
+            console.log(rowData)
             return (
-              <Label>
-              asdadsasdasd
-              </Label>
+              <Label text={ rowData.text } media={ rowData.media ? rowData.media : [] } name={ rowData.user.name } id={ rowData.user.id }  />
             )
           }}/>
 

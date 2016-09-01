@@ -86,8 +86,8 @@ export default class TwitterCard extends React.Component{
     let timeAgo = moment( new Date(cardData.created_at) ).fromNow();
 
     return (
-      <TouchableNativeFeedback onPress={this.props.MovetoComments} background={TouchableNativeFeedback.SelectableBackground()}>
-
+      <TouchableNativeFeedback background={TouchableNativeFeedback.SelectableBackground()}>
+        {/* onPress={ this.props.MovetoComments.bind(this, cardData.id) } */}
         <View style={styles.mainContainer}>
           {  (cardData.retweet) ? <Text fontStyle="italic" style={{fontSize: 12, textAlign: 'left'}}>{ this.props.title } retweeted: </Text> : null }
           <View style={{flex: 1, flexDirection: 'row'}}>
@@ -121,7 +121,7 @@ export default class TwitterCard extends React.Component{
 
             { cardData.media.map( this.renderMedia.bind(this) ) }
 
-            <View>
+            {/* <View>
               <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 35, marginTop: 10}}>
 
                 <TouchableNativeFeedback background={TouchableNativeFeedback.SelectableBackground()}>
@@ -147,7 +147,7 @@ export default class TwitterCard extends React.Component{
                 </TouchableNativeFeedback>
 
               </View>
-            </View>
+            </View> */}
           </View>
 
         </View>

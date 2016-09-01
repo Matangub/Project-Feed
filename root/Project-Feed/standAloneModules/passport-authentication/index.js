@@ -38,6 +38,7 @@ var passport = require('passport');
 //passport
 var GithubStrategy = require('passport-github').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
+var facebookStrategy = require('passport-facebook').Strategy;
 
 // Express and Passport Session
 var session = require('express-session');
@@ -138,6 +139,40 @@ module.exports = {
 
     // Twitter will call this URL
     router.get('/twitter/callback', passport.authenticate('twitter', { failureRedirect: '/' }), (req, res, next) => {
+
+      // res.sendStatus(200);
+      callback(req, res, next);
+    });
+
+  },
+
+  facebookAuth: function( credentials, callback) {
+
+    // we will call this to start the Twitter Login process
+    router.get('/facebook', (req, res, next) => {
+
+      passport.use(new facebookStrategy({
+          clientID: credentials.id,
+          clientSecret: credentials.secret,
+          callbackURL: `${credentials.callbackURL}?action=${req.query.action}&userId=${req.query.id}`,
+          enableProof: false,
+          passReqToCallback: true
+        },
+        function(req, token, tokenSecret, profile, done) {
+
+          return done(null, {
+            accessToken: token,
+            tokenSecret: tokenSecret,
+            profile: profile
+          });
+        }
+      ));
+
+      passport.authenticate('facebook',{callbackURL: `${credentials.callbackURL}?action=${req.query.action}&userId=${req.query.id}`})(req, res, next)
+    });
+
+    // Twitter will call this URL
+    router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/' }), (req, res, next) => {
 
       // res.sendStatus(200);
       callback(req, res, next);

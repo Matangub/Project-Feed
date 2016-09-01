@@ -18,7 +18,7 @@ import {
   Linking
 } from 'react-native';
 import { connect } from 'react-redux'
-import * as userActions from '../../actions/feedActions.js';
+import * as feedActions from '../../actions/feedActions.js';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 
 import styleConfig from '../../util/styleConfig.js';
@@ -51,16 +51,19 @@ export default class Main extends React.Component{
     }
   }
 
-  goToComments() {
+  goToComments(id) {
 
     _navigator.push({
       component: Comments,
-      title: 'Comments'
+      title: 'Comments',
+      id: id
     })
   }
 
   componentDidMount() {
     this.fetchFeed();
+    console.log(this.props.feed.twitter.data);
+    // this.props.dispatch(feedActions.get_replies(this.props.user.userId, this.props.feed.twitter.data[0].id));
   }
 
   componentWillReceiveProps( nextProps ) {
@@ -69,14 +72,15 @@ export default class Main extends React.Component{
   }
 
   fetchFeed() {
-    this.props.dispatch( userActions.get_twitter_feed( this.props.user.userId, 'twitter' ) )
+    this.props.dispatch( feedActions.get_twitter_feed( this.props.user.userId, 'twitter' ) )
+    // this.props.dispatch(feedActions.get_replies(this.props.user.userId, this.props.feed.twitter.data[0].id));
   }
 
   fetchMoreFeed(socialProvider) {
 
     console.log('fetchMoreFeed');
     let feed = this.props.feed.twitter.data;
-    this.props.dispatch( userActions.get_more_twitter_feed(
+    this.props.dispatch( feedActions.get_more_twitter_feed(
         this.props.user.userId,
         feed[ feed.length - 1 ].id,
         20
@@ -113,7 +117,7 @@ export default class Main extends React.Component{
 
   set_like(postId, value) {
     console.log('SET LIKE!!!');
-    this.props.dispatch( userActions.twitter_toggle_like( this.props.user.userId, postId, value) )
+    this.props.dispatch( feedActions.twitter_toggle_like( this.props.user.userId, postId, value) )
   }
 
   renderFooter() {
@@ -143,20 +147,20 @@ export default class Main extends React.Component{
         return (
           <View>
             {
-              (rowData.retweeted_status) ?
+              (rowData.retweeted) ?
                 <TwitterCard
                   feedScrollOffSet={ this.state.feedScrollOffSet }
                   rowData={rowData}
                   handleLink={ this.handleLink.bind(this) }
                   set_like={ ( id, value ) => this.set_like(id, value) }
-                  onCommentsPress={ this.goToComments } /> : null
+                  MovetoComments={ this.goToComments.bind(this) } /> : null
             }
             <TwitterCard
               feedScrollOffSet={ this.state.feedScrollOffSet }
               rowData={rowData}
               handleLink={ this.handleLink.bind(this) }
               set_like={ ( id, value ) => this.set_like(id, value) }
-              onCommentsPress={ this.goToComments } />
+              MovetoComments={ this.goToComments.bind(this) } />
           </View>
         )
       }}/>
@@ -189,26 +193,8 @@ export default class Main extends React.Component{
           { this.renderFeed() }
         </ScrollView>
 
-        <ScrollView tabLabel="ios-notifications" style={styles.tabView}>
+        <ScrollView tabLabel="ios-cog" style={styles.tabView}>
           <Notifications />
-        </ScrollView>
-
-        <ScrollView tabLabel="ios-chatboxes" style={styles.tabView}>
-          <View style={styles.card}>
-          <Text>Messenger</Text>
-          </View>
-        </ScrollView>
-
-        <ScrollView tabLabel="ios-people" style={styles.tabView}>
-          <View style={styles.card}>
-          <Text>Notifications</Text>
-          </View>
-        </ScrollView>
-
-        <ScrollView tabLabel="ios-list" style={styles.tabView}>
-          <View style={styles.card}>
-          <Text>Other nav</Text>
-          </View>
         </ScrollView>
 
       </ScrollableTabView>
