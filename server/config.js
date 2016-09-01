@@ -10,6 +10,10 @@ var config = {
     twitter: {
       id: '5YB7ftXo6EQoCaHmYikV7AmcA',
       secret: 'DeWvSf5MHuGIPB1toMjGRUttQy5Wh6AtIwUBlpy2qZLgPSxenf'
+    },
+    facebook: {
+      id: '520361698170156',
+      secret: '04fa891040503be404f937917e9d3a2d'
     }
   }
 }
