@@ -67,38 +67,37 @@ export default function reducer( state={
           feed[i].likeCounter = feed[i].likeCounter + incrementBy;
         }
       }
-      console.log('feed');
-      console.log(feed);
+
       return {
         ...state,
         [action.payload.socialProvider]: {
           data: feed,
           fetching: false,
-          fetchingMore: true,
+          fetchingMore: false,
           err: action.err
         }
       }
-      //
-      // let newFeed = state[action.payload.socialProvider].data.map( (item, index) => {
-      //
-      //   if(item.id === action.payload.id) {
-      //
-      //     //set like status
-      //     let newItem = item;
-      //     newItem.like = action.payload.like;
-      //
-      //     //set like counter
-      //     let incrementBy = (action.payload.like) ? 1 : -1;
-      //     newItem.likeCounter = newItem.favorite_count + incrementBy;
-      //
-      //     return newItem;
-      //   }
-      //
-      //   return item;
-      // })
+    }
+    case 'SET_REPLIES': {
 
-      console.log('newFeed');
-      console.log(newFeed);
+      let params = action.payload;
+      let newFeed = state[action.payload.socialProvider].data.map( (item) => {
+
+        if(item.id == params.id) {
+          item.replies = params.replies;
+
+        }
+
+        return item;
+      })
+
+      return {
+        ...state,
+        [action.payload.socialProvider]: {
+          ...state[action.payload.socialProvider],
+          data: newFeed
+        }
+      }
     }
     default: return state;
   }

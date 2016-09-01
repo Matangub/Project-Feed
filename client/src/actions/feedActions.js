@@ -1,6 +1,28 @@
 import styleConfig from '../util/styleConfig.js';
 import axios from 'axios';
 
+export function get_replies( userId, tweet_id ) {
+  return function(dispatch) {
+
+    let uri = `${styleConfig.credentials.host}/twitter/GET_REPLIES/${userId}?q=${tweet_id}`;
+
+    return axios(uri).then( (response) => {
+      dispatch({
+        type: 'SET_REPLIES',
+        payload: {
+          socialProvider: 'twitter',
+          id: tweet_id,
+          replies: response.data.replies
+        }
+      })
+    }).catch( (err) =>  {
+
+      console.log('err');
+      console.log(err);
+    })
+  }
+}
+
 export function twitter_toggle_like(userId, tweet_id, value) {
   return function(dispatch) {
 

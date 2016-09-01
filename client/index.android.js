@@ -244,11 +244,11 @@ class client extends Component {
   renderScene(route, navigator) {
 
     _navigator = navigator;
-
+    
     return (
       <View style={{flex: 1}}>
         { this.renderWebview.bind(this)() }
-        <route.component viewState={this.state.viewState} renderWebview={this.renderLink.bind(this)} showNavBar={this.showNavBar.bind(this)} navigator={navigator} {...route.passProps} />
+        <route.component viewState={this.state.viewState} renderWebview={this.renderLink.bind(this)} showNavBar={this.showNavBar.bind(this)} navigator={navigator} {...route} { ...route.passProps} />
         {/* { (this.state.showNav) ? this.renderBottomTabs() : null } */}
       </View>
     );

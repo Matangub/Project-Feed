@@ -53,8 +53,8 @@ router.get('/:action/:userId', (req, res, next) => {
         requestUrl = `https://api.twitter.com/1.1/favorites/destroy.json`;
         break;
       case 'GET_REPLIES':
-        signatureFields = { q: req.query.q};
-        requestUrl = `https://api.twitter.com/1.1/search/tweets.json?q=${encodeURIComponent(req.query.q)}`;
+        signatureFields = { q: req.query.name, since_id: req.query.id, count: 20 };
+        requestUrl = `https://api.twitter.com/1.1/search/tweets.json?q=${encodeURIComponent(req.query.name)}&since_id=${req.query.id}&count=${req.query.count}`;
         break;
       default:
         return res.json("Invalid action")
@@ -86,6 +86,7 @@ router.get('/:action/:userId', (req, res, next) => {
     };
 
     // ACTUALL REQUEST TO THE API
+    console.log('requestUrl: ', requestUrl)
     request({
       url: requestUrl,
       method: httpMethod.toLowerCase(),
@@ -94,11 +95,20 @@ router.get('/:action/:userId', (req, res, next) => {
       formData: formParams
     }, (err, response, body) => {
 
-      // if( JSON.parse( response.body ).errors ) return res.json(JSON.parse(response.body));
+      try {
+        console.log(JSON.parse(response.body).errors);
+        if(JSON.parse(response.body).errors) {
+
+          return res.sendStatus(500);
+        }
+      } catch(err) {
+
+      }
 
       switch(urlAction) {
 
         case 'FEED': {
+
           handleFeed(req, res, response, body);
           // res.json(JSON.parse(response.body));
           break;
@@ -110,13 +120,11 @@ router.get('/:action/:userId', (req, res, next) => {
         }
         case 'GET_REPLIES': {
 
-          handleReplies(req, res, response, body);
+          // handleReplies(req, res, response, body);
+          res.json({response: response})
           break;
         }
         default: {
-          console.log('\n');
-          console.log(response);
-          console.log('\n');
           res.json({response: response});
         }
       }
@@ -125,22 +133,23 @@ router.get('/:action/:userId', (req, res, next) => {
 
 });
 
+function handleMedia( media ) {
+
+  if(!media) return null;
+
+  var exportMedia = media.map( (item) => {
+
+    return {
+      id: item.id_str,
+      media: item.media_url_https,
+      type: item.type,
+      videoLink: item.video_info ? item.video_info.variants[0].url : null
+    }
+  })
+  return exportMedia;
+}
+
 function handleFeed(req, res, response, body) {
-
-  const getMedia = (media) => {
-
-    var exportMedia = media.map( (item) => {
-
-      return {
-        id: item.id_str,
-        media: item.media_url_https,
-        type: item.type,
-        videoLink: item.video_info ? item.video_info.variants[0].url : null
-      }
-    })
-    return exportMedia;
-    // return media;
-  }
 
   var data = JSON.parse(response.body);
   var exportData = data.map( (item) => {
@@ -149,7 +158,7 @@ function handleFeed(req, res, response, body) {
 
     return {
       original: item,
-      retweet: item.retweet,
+      retweet: item.retweeted,
       postId: item.id,
       id: item.id_str,
       like: item.favorited,
@@ -159,7 +168,7 @@ function handleFeed(req, res, response, body) {
       text: jsonItem.text,
       created_at: jsonItem.created_at,
       banner: jsonItem.user.profile_image_url_https,
-      media: jsonItem.extended_entities ? getMedia( jsonItem.extended_entities.media ) : [],
+      media: jsonItem.extended_entities ? handleMedia( jsonItem.extended_entities.media ) : [],
     }
   })
 
@@ -169,14 +178,23 @@ function handleFeed(req, res, response, body) {
 function handleReplies (req, res, response, body) {
 
   var data = JSON.parse(response.body);
-  var replies = data.statuses.filter( (item) => {
-
+  var replies = [];
+  data.statuses.map( (item) => {
     if(item.in_reply_to_status_id_str == req.query.postId) {
-      return item;
+      replies.push({
+        text: item.text,
+        media: item.extended_entities ? handleMedia(item.extended_entities.media) : null,
+        id: item.id_str,
+        created_at: item.created_at,
+        user: {
+          id: item.user.id_str,
+          name: item.user.name
+        }
+      })
     }
   })
 
-  res.json({response: replies});
+  res.json({replies});
 }
 
 module.exports = router;
